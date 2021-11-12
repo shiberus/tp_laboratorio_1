@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "LinkedList.h"
 #include "Employee.h"
 #include "Controller.h"
@@ -323,6 +324,93 @@ int controller_ListEmployee(LinkedList* pArrayListEmployee)
 int controller_sortEmployee(LinkedList* pArrayListEmployee)
 {
     int todoOk = -1;
+	int option = 0;
+
+	if(pArrayListEmployee != NULL)
+	{
+		do
+		{
+			printf("*** Ordenar empleados ***\n\n");
+			printf("1- Id ascendente\n");
+			printf("2- Id descendente\n");
+			printf("3- Nombre ascendente\n");
+			printf("4- Nombre descendente\n");
+			printf("5- Horas trabajadas ascendente\n");
+			printf("6- Horas trabajadas descendente\n");
+			printf("7- Sueldo ascendente\n");
+			printf("8- Sueldo descendente\n");
+			printf("9- Salir\n");
+			fflush(stdin);
+			scanf("%d", &option);
+
+			switch(option)
+			{
+				case 1:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareIds, 1);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 2:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareIds, 0);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 3:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareNombres, 1);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 4:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareNombres, 0);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 5:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareHoras, 1);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 6:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareHoras, 0);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 7:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareSueldos, 1);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 8:
+					printf("Ordenando...\n");
+					ll_sort(pArrayListEmployee, controller_compareSueldos, 0);
+					controller_ListEmployee(pArrayListEmployee);
+					pausar("Elementos ordenados");
+					break;
+
+				case 9:
+					break;
+
+				default:
+					pausar("Opcion invalida");
+					break;
+			}
+		} while (option != 9);
+		
+	}
 
 	return todoOk;
 }
@@ -343,6 +431,7 @@ int controller_saveAsText(char* path , LinkedList* pArrayListEmployee)
 		FILE* f = fopen(path,"w");
 		if(f != NULL)
 		{
+			controller_setModoDeDato(1);
 			fail = parser_EmployeeToText(f, pArrayListEmployee);
 
 			if(!fail)
@@ -373,6 +462,7 @@ int controller_saveAsBinary(char* path , LinkedList* pArrayListEmployee)
 		FILE* f = fopen(path,"wb");
 		if(f != NULL)
 		{
+			controller_setModoDeDato(2);
 			fail = parser_EmployeeToBinary(f, pArrayListEmployee);
 
 			if(!fail)
@@ -448,4 +538,102 @@ int controller_getMaxId(LinkedList* pArrayListEmployee)
 	}
 
     return idMax;
+}
+
+int controller_compareIds(void* first, void* second)
+{
+	int resultado = 0;
+	int firstId, secondId;
+
+	if(first != NULL && second != NULL)
+	{
+		Employee* firstEmp = (Employee*) first;
+		Employee* secondEmp = (Employee*) second;
+
+		if(!employee_getId(firstEmp, &firstId) && !employee_getId(secondEmp, &secondId))
+		{
+			resultado = firstId - secondId;
+		}
+	}
+
+	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
+}
+
+int controller_compareNombres(void* first, void* second)
+{
+	int resultado = 0;
+	char firstNombre[128];
+	char secondNombre[128];
+
+	if(first != NULL && second != NULL)
+	{
+		Employee* firstEmp = (Employee*) first;
+		Employee* secondEmp = (Employee*) second;
+		 
+		if(!employee_getNombre(firstEmp, firstNombre) && !employee_getNombre(secondEmp, secondNombre))
+		{
+			resultado = strcmp(firstNombre, secondNombre);
+		}
+	}
+
+	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;
+}
+
+int controller_compareHoras(void* first, void* second)
+{
+	int resultado = 0;
+	int firstHoras, secondHoras;
+
+	if(first != NULL && second != NULL)
+	{
+		Employee* firstEmp = (Employee*) first;
+		Employee* secondEmp = (Employee*) second;
+
+		if(!employee_getHorasTrabajadas(firstEmp, &firstHoras) && !employee_getHorasTrabajadas(secondEmp, &secondHoras))
+		{
+			resultado = firstHoras - secondHoras;
+		}
+	}
+
+	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
+}
+
+int controller_compareSueldos(void* first, void* second)
+{
+	int resultado = 0;
+	int firstSueldo, secondSueldo;
+
+	if(first != NULL && second != NULL)
+	{
+		Employee* firstEmp = (Employee*) first;
+		Employee* secondEmp = (Employee*) second;
+
+		if(!employee_getSueldo(firstEmp, &firstSueldo) && !employee_getSueldo(secondEmp, &secondSueldo))
+		{
+			resultado = firstSueldo - secondSueldo;
+		}
+	}
+
+	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
+}
+
+int controller_setModoDeDato(int modo)
+{
+	int success = 0;
+	FILE* f = fopen("modo.csv", "w");
+	if(f != NULL)
+	{
+		success = fprintf(f,"%d",modo);
+	}	
+	return success;
+}
+int controller_getModoDeDato(int* pModo)
+{
+	int success = 0;
+	FILE* f = fopen("modo.csv", "r");
+	if(f != NULL)
+	{
+		success = fscanf(f,"%d",pModo);
+	}	
+	return success;
 }

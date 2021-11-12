@@ -5,6 +5,9 @@
 #include "Employee.h"
 #include "Util.h"
 
+#define TEXTO 1
+#define BINARIO 2
+
 /****************************************************
     Menu:
      1. Cargar los datos de los empleados desde el archivo data.csv (modo texto).
@@ -25,7 +28,7 @@ int main()
 {
 	setbuf(stdout, NULL);
 
-    int option, fail, nextId;
+    int option, fail, nextId, modo;
     LinkedList* listaEmpleados = ll_newLinkedList();
 
     do{
@@ -47,16 +50,25 @@ int main()
             case 1:
             	if(ll_isEmpty(listaEmpleados))
             	{
-            		fail = controller_loadFromText("data.csv",listaEmpleados);
+					controller_getModoDeDato(&modo);
 
-            		if(fail)
-            		{
-            			pausar("Oh oh, hubo un error");
-            		}
-            		else
-            		{
-            			pausar("Los datos se cargaron exitosamente");
-            		}
+					if(modo == TEXTO)
+					{
+						fail = controller_loadFromText("data.csv",listaEmpleados);
+
+						if(fail)
+						{
+							pausar("Oh oh, hubo un error");
+						}
+						else
+						{
+							pausar("Los datos se cargaron exitosamente");
+						}
+					}
+					else
+					{
+						pausar("Los datos NO estan guardados en modo texto");
+					}
             	}
             	else
             	{
@@ -67,16 +79,25 @@ int main()
             case 2:
             	if(ll_isEmpty(listaEmpleados))
             	{
-            		fail = controller_loadFromBinary("data.csv",listaEmpleados);
+					controller_getModoDeDato(&modo);
 
-            		if(fail)
-            		{
-            			pausar("Oh oh, hubo un error");
-            		}
-            		else
-            		{
-            			pausar("Los datos se cargaron exitosamente");
-            		}
+					if(modo == BINARIO)
+					{
+						fail = controller_loadFromBinary("data.csv",listaEmpleados);
+
+						if(fail)
+						{
+							pausar("Oh oh, hubo un error");
+						}
+						else
+						{
+							pausar("Los datos se cargaron exitosamente");
+						}
+					}
+					else
+					{
+						pausar("Los datos NO estan guardados en modo binario");
+					}
             	}
             	else
             	{
@@ -148,7 +169,7 @@ int main()
             case 7:
             	if(!ll_isEmpty(listaEmpleados))
 				{
-					// ordenar empleados
+					controller_sortEmployee(listaEmpleados);
 				}
 				else
 				{
