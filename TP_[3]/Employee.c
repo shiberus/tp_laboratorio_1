@@ -144,19 +144,29 @@ int employee_getSueldo(Employee *this, int *sueldo)
 	return todoOk;
 }
 
-void employee_print(Employee* this)
+int employee_print(Employee* this)
 {
-	int id, horas, sueldo;
-	char nombre[128];
+	int todoOk = -1;
+	int* id = (int*) malloc(sizeof(int));
+	int* horas = (int*) malloc(sizeof(int));
+	int* sueldo = (int*) malloc(sizeof(int));
+	char* nombre = (char*) malloc(sizeof(char) * 256);
 
-	if(this != NULL)
+	if(this != NULL && id != NULL && nombre != NULL && sueldo != NULL && horas != NULL)
 	{
 		if(!employee_getNombre(this, nombre) &&
-		!employee_getHorasTrabajadas(this, &horas) &&
-		!employee_getSueldo(this, &sueldo) &&
-		!employee_getId(this, &id))
+		!employee_getHorasTrabajadas(this, horas) &&
+		!employee_getSueldo(this, sueldo) &&
+		!employee_getId(this, id))
 		{
-			printf("%4d  %18s      %3d      %5d \n", id, nombre, horas, sueldo);
+			printf("%4d  %18s      %3d      %5d \n", *id, nombre, *horas, *sueldo);
 		}
+		todoOk = 0;
 	}
+	free(id);
+	free(horas);
+	free(sueldo);
+	free(nombre);
+
+	return todoOk;
 }

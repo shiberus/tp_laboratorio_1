@@ -8,100 +8,89 @@
 #include "Util.h"
 
 
-/** \brief Carga los datos de los empleados desde el archivo data.csv (modo texto).
- *
- * \param path char*
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_loadFromText(char* path , LinkedList* pArrayListEmployee)
 {
 	int todoOk = -1;
-	int fail = 1;
+	int* fail = (int*) malloc(sizeof(int));
+	
 	FILE* pFile;
 	
-	if(path != NULL && pArrayListEmployee != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && fail != NULL)
 	{
+		*fail = 1;
 		pFile = fopen(path, "r");
 		if(pFile != NULL)
 		{
-			fail = parser_EmployeeFromText(pFile, pArrayListEmployee);
+			*fail = parser_EmployeeFromText(pFile, pArrayListEmployee);
 
-			if (!fail)
+			if (!(*fail))
 			{
 				todoOk = 0;
 			}
 		}
 		fclose(pFile);
 	}
+	free(fail);
 
 	return todoOk;
 }
 
-/** \brief Carga los datos de los empleados desde el archivo data.csv (modo binario).
- *
- * \param path char*
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_loadFromBinary(char* path , LinkedList* pArrayListEmployee)
 {
-    int todoOk = -1;
-	int fail = 1;
+	int todoOk = -1;
+	int* fail = (int*) malloc(sizeof(int));
+	
 	FILE* pFile;
 	
-	if(path != NULL && pArrayListEmployee != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && fail != NULL)
 	{
+		*fail = 1;
 		pFile = fopen(path, "rb");
 		if(pFile != NULL)
 		{
-			fail = parser_EmployeeFromBinary(pFile, pArrayListEmployee);
+			*fail = parser_EmployeeFromBinary(pFile, pArrayListEmployee);
 
-			if (!fail)
+			if (!(*fail))
 			{
 				todoOk = 0;
 			}
 		}
 		fclose(pFile);
 	}
+	free(fail);
 
 	return todoOk;
 }
 
-/** \brief Alta de empleados
- *
- * \param path char*
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_addEmployee(LinkedList* pArrayListEmployee, int nextId)
 {
 	int todoOk = -1;
-	int fail, horas, sueldo;
-	char nombre[128];
+	int* fail = (int*) malloc(sizeof(int));
+	int* horas = (int*) malloc(sizeof(int));
+	int* sueldo = (int*) malloc(sizeof(int));
+	char* nombre = (char*) malloc(sizeof(char) * 128);
+	
 	Employee* pEmpleado = employee_new();
 
-	if(pArrayListEmployee != NULL && pEmpleado != NULL)
+	if(pArrayListEmployee != NULL && pEmpleado != NULL && fail != NULL && nombre != NULL && sueldo != NULL && horas != NULL)
 	{
+		*fail = 1;
 		ingresarString(nombre, "Ingrese nombre", 2, 127);
-		fail = utn_getNumero(&horas, "Ingrese horas trabajadas: ", "Ingrese un numero valido (entre 0 y 9999): ", 0, 9999, 5);
-		if(fail)
+		*fail = utn_getNumero(horas, "Ingrese horas trabajadas: ", "Ingrese un numero valido (entre 0 y 9999): ", 0, 9999, 5);
+		if(*fail)
 		{
 			pausar("No se pudieron ingresar las horas");
 		}
 
-		fail = utn_getNumero(&sueldo, "Ingrese sueldo: ", "Ingrese un numero valido (entre 8000 y 1.000.000): ", 0, 1000000, 5);
-		if(fail)
+		*fail = utn_getNumero(sueldo, "Ingrese sueldo: ", "Ingrese un numero valido (entre 8000 y 1.000.000): ", 0, 1000000, 5);
+		if(*fail)
 		{
 			pausar("No se pudo ingresar el sueldo");
 		}
 
 		if(!employee_setNombre(pEmpleado, nombre) &&
-		!employee_setHorasTrabajadas(pEmpleado, horas) &&
-		!employee_setSueldo(pEmpleado, sueldo) &&
+		!employee_setHorasTrabajadas(pEmpleado, *horas) &&
+		!employee_setSueldo(pEmpleado, *sueldo) &&
 		!employee_setId(pEmpleado, nextId))
 		{
 			ll_add(pArrayListEmployee, pEmpleado);
@@ -114,44 +103,50 @@ int controller_addEmployee(LinkedList* pArrayListEmployee, int nextId)
 		}
 	}
 
+	free(fail);
+	free(horas);
+	free(sueldo);
+	free(nombre);
 
     return todoOk;
 }
 
-/** \brief Modificar datos de empleado
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_editEmployee(LinkedList* pArrayListEmployee)
 {
-    int todoOk = -1;
-	int continuar = 1;
-	int id, index, option, fail, sueldo, horas;
-	char nombre[128];
+	int todoOk = -1;
+	int* fail = (int*) malloc(sizeof(int));
+	int* continuar = (int*) malloc(sizeof(int));
+	int* id = (int*) malloc(sizeof(int));
+	int* horas = (int*) malloc(sizeof(int));
+	int* sueldo = (int*) malloc(sizeof(int));
+	int* index = (int*) malloc(sizeof(int));
+	int* option = (int*) malloc(sizeof(int));
+	char* nombre = (char*) malloc(sizeof(char) * 128);
 	Employee* pEmpleado;
 
-    if(pArrayListEmployee != NULL)
+
+    if(pArrayListEmployee != NULL && fail != NULL && continuar != NULL && id != NULL && horas != NULL &&
+	sueldo != NULL && index != NULL && option != NULL && nombre != NULL)
     {
+		*continuar = 1;
 		controller_ListEmployee(pArrayListEmployee);
-		utn_getNumero(&id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
+		utn_getNumero(id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
 		
-		index = controller_findEmployeeById(pArrayListEmployee, id);
-		while(index == -1 && continuar)
+		*index = controller_findEmployeeById(pArrayListEmployee, *id);
+		while(*index == -1 && *continuar)
 		{
-			continuar = !cancelarOperacion("No se encontro al empleado");
-			utn_getNumero(&id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
-			index = controller_findEmployeeById(pArrayListEmployee, id);
+			*continuar = !cancelarOperacion("No se encontro al empleado");
+			utn_getNumero(id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
+			*index = controller_findEmployeeById(pArrayListEmployee, *id);
 		}
 
-		if(index != -1)
+		if(*index != -1)
 		{
-			pEmpleado = ll_get(pArrayListEmployee, index);
+			pEmpleado = ll_get(pArrayListEmployee, *index);
 
 			if(pEmpleado == NULL)
 			{
-				continuar = 0;
+				*continuar = 0;
 			}
 			else
 			{
@@ -159,7 +154,7 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 			}
 		}
 
-		while(continuar)
+		while(*continuar)
 		{
 			printf("   id  |       nombre       | horas |  sueldo \n");
 			printf("----------------------------------------------- \n");
@@ -170,9 +165,9 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 	    	printf("2- modificar horas trabajadas\n");
 	    	printf("3- modificar sueldo\n");
 	    	printf("4- salir\n\n");
-	    	scanf("%d", &option);
+	    	scanf("%d", option);
 
-			switch (option)
+			switch (*option)
 			{
 				case 1:
 					ingresarString(nombre, "Ingrese nombre", 2, 127);
@@ -183,14 +178,14 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 					break;
 
 				case 2:
-					fail = utn_getNumero(&horas, "Ingrese horas trabajadas: ", "Ingrese un numero valido (entre 0 y 9999): ", 0, 9999, 5);
-					if(fail)
+					*fail = utn_getNumero(horas, "Ingrese horas trabajadas: ", "Ingrese un numero valido (entre 0 y 9999): ", 0, 9999, 5);
+					if(*fail)
 					{
 						pausar("No se pudieron ingresar las horas");
 					}
 					else
 					{
-						if(!employee_setHorasTrabajadas(pEmpleado, horas))
+						if(!employee_setHorasTrabajadas(pEmpleado, *horas))
 						{
 							pausar("\n Operacion exitosa");
 						}
@@ -198,14 +193,14 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 					break;
 
 				case 3:
-					fail = utn_getNumero(&sueldo, "Ingrese sueldo: ", "Ingrese un numero valido (entre 8000 y 1.000.000): ", 0, 1000000, 5);
-					if(fail)
+					*fail = utn_getNumero(sueldo, "Ingrese sueldo: ", "Ingrese un numero valido (entre 8000 y 1.000.000): ", 0, 1000000, 5);
+					if(*fail)
 					{
 						pausar("No se pudo ingresar el sueldo");
 					}
 					else
 					{
-						if(!employee_setSueldo(pEmpleado, sueldo))
+						if(!employee_setSueldo(pEmpleado, *sueldo))
 						{
 							pausar("\n Operacion exitosa");
 						}
@@ -217,7 +212,7 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 					break;
 
 				case 4:
-					continuar = 0;
+					*continuar = 0;
 					break;
 
 				default:
@@ -227,37 +222,43 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 		}
     }
 
+	free(fail);
+	free(continuar);
+	free(id);
+	free(horas);
+	free(sueldo);
+	free(index);
+	free(option);
+	free(nombre);
+
 	return todoOk;
 }
 
-/** \brief Baja de empleado
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_removeEmployee(LinkedList* pArrayListEmployee)
 {
-    int todoOk = -1;
-	int index, continuar, id;
+	int todoOk = -1;
+	int* continuar = (int*) malloc(sizeof(int));
+	int* id = (int*) malloc(sizeof(int));
+	int* index = (int*) malloc(sizeof(int));
+
 	Employee* pEmpleado;
 
-	if(pArrayListEmployee != NULL)
+	if(pArrayListEmployee != NULL && continuar != NULL && id != NULL && index != NULL)
 	{
 		controller_ListEmployee(pArrayListEmployee);
-		utn_getNumero(&id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
+		utn_getNumero(id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
 		
-		index = controller_findEmployeeById(pArrayListEmployee, id);
-		while(index == -1 && continuar)
+		*index = controller_findEmployeeById(pArrayListEmployee, *id);
+		while(*index == -1 && *continuar)
 		{
-			continuar = !cancelarOperacion("No se encontro al empleado");
-			utn_getNumero(&id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
-			index = controller_findEmployeeById(pArrayListEmployee, id);
+			*continuar = !cancelarOperacion("No se encontro al empleado");
+			utn_getNumero(id, "Ingrese id: ", "Ingrese un numero valido (entre 1 y 9999): ", 1, 9999, 20);
+			*index = controller_findEmployeeById(pArrayListEmployee, *id);
 		}
 
-		if(index != -1)
+		if(*index != -1)
 		{
-			pEmpleado = ll_get(pArrayListEmployee, index);
+			pEmpleado = ll_get(pArrayListEmployee, *index);
 
 			if(pEmpleado != NULL)
 			{
@@ -267,8 +268,8 @@ int controller_removeEmployee(LinkedList* pArrayListEmployee)
 				printf("----------------------------------------------- \n\n");
 				if(preguntar("Eliminar al empleado?"))
 				{
-					ll_remove(pArrayListEmployee, index);
-					free(pEmpleado);
+					ll_remove(pArrayListEmployee, *index);
+					employee_delete(pEmpleado);
 					pausar("Operacion exitosa");
 				}
 				else
@@ -280,28 +281,27 @@ int controller_removeEmployee(LinkedList* pArrayListEmployee)
 		}
 	}
 
+	free(continuar);
+	free(id);
+	free(index);
+
 	return todoOk;
 }
 
-/** \brief Listar empleados
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_ListEmployee(LinkedList* pArrayListEmployee)
 {
-    int todoOk = -1;
-	int tam;
+	int todoOk = -1;
+	int* tam = (int*) malloc(sizeof(int));
+
 	Employee* pEmpleado;
 
-	if(pArrayListEmployee != NULL)
+	if(pArrayListEmployee != NULL && tam != NULL)
 	{
-		tam = ll_len(pArrayListEmployee);
+		*tam = ll_len(pArrayListEmployee);
 
 		printf("   id  |       nombre       | horas |  sueldo \n");
 		printf("----------------------------------------------- \n");
-		for(int i = 0; i < tam; i++)
+		for(int i = 0; i < *tam; i++)
 		{
 			pEmpleado = (Employee*) ll_get(pArrayListEmployee, i);
 
@@ -310,24 +310,21 @@ int controller_ListEmployee(LinkedList* pArrayListEmployee)
 				employee_print(pEmpleado);
 			}
 		}
+		todoOk = 0;
 	}
+	free(tam);
 
 	return todoOk;
 }
 
-/** \brief Ordenar empleados
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_sortEmployee(LinkedList* pArrayListEmployee)
 {
     int todoOk = -1;
-	int option = 0;
+	int* option = (int*) malloc(sizeof(int));
 
-	if(pArrayListEmployee != NULL)
+	if(pArrayListEmployee != NULL && option != NULL)
 	{
+		*option = 0;
 		do
 		{
 			printf("*** Ordenar empleados ***\n\n");
@@ -341,9 +338,9 @@ int controller_sortEmployee(LinkedList* pArrayListEmployee)
 			printf("8- Sueldo descendente\n");
 			printf("9- Salir\n");
 			fflush(stdin);
-			scanf("%d", &option);
+			scanf("%d", option);
 
-			switch(option)
+			switch(*option)
 			{
 				case 1:
 					printf("Ordenando...\n");
@@ -408,33 +405,28 @@ int controller_sortEmployee(LinkedList* pArrayListEmployee)
 					pausar("Opcion invalida");
 					break;
 			}
-		} while (option != 9);
-		
+		} while (*option != 9);
+		todoOk = 0;
 	}
+	free(option);
 
 	return todoOk;
 }
 
-/** \brief Guarda los datos de los empleados en el archivo data.csv (modo texto).
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_saveAsText(char* path , LinkedList* pArrayListEmployee)
 {
-	int todoOk = -1;
-	int fail;
+    int todoOk = -1;
+	int* fail = (int*) malloc(sizeof(int));
 
-	if(path != NULL && pArrayListEmployee != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && fail != NULL)
 	{
+		*fail = 1;
 		FILE* f = fopen(path,"w");
 		if(f != NULL)
 		{
-			controller_setModoDeDato(1);
-			fail = parser_EmployeeToText(f, pArrayListEmployee);
+			*fail = parser_EmployeeToText(f, pArrayListEmployee);
 
-			if(!fail)
+			if(!(*fail))
 			{
 				todoOk = 0;
 			}
@@ -442,30 +434,25 @@ int controller_saveAsText(char* path , LinkedList* pArrayListEmployee)
 			fclose(f);
 		}
 	}
+	free(fail);
 
     return todoOk;
 }
 
-/** \brief Guarda los datos de los empleados en el archivo data.csv (modo binario).
- *
- * \param pArrayListEmployee LinkedList*
- * \return int
- *
- */
 int controller_saveAsBinary(char* path , LinkedList* pArrayListEmployee)
 {
     int todoOk = -1;
-	int fail;
+	int* fail = (int*) malloc(sizeof(int));
 
-	if(path != NULL && pArrayListEmployee != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && fail != NULL)
 	{
+		*fail = 1;
 		FILE* f = fopen(path,"wb");
 		if(f != NULL)
 		{
-			controller_setModoDeDato(2);
-			fail = parser_EmployeeToBinary(f, pArrayListEmployee);
+			*fail = parser_EmployeeToBinary(f, pArrayListEmployee);
 
-			if(!fail)
+			if(!(*fail))
 			{
 				todoOk = 0;
 			}
@@ -473,29 +460,34 @@ int controller_saveAsBinary(char* path , LinkedList* pArrayListEmployee)
 			fclose(f);
 		}
 	}
+	free(fail);
 
     return todoOk;
 }
 
 int controller_findEmployeeById(LinkedList* pArrayListEmployee, int id)
 {
-	int tam, idAux, fail;
 	int index = -1;
+	int* tam = (int*) malloc(sizeof(int));
+	int* idAux = (int*) malloc(sizeof(int));
+	int* fail = (int*) malloc(sizeof(int));
+
+	*fail = 1;
 	Employee* pEmpleado;
 
-	if(pArrayListEmployee != NULL && id > 0)
+	if(pArrayListEmployee != NULL && tam != NULL && idAux != NULL && fail != NULL && id > 0)
 	{
-		tam = ll_len(pArrayListEmployee);
+		*tam = ll_len(pArrayListEmployee);
 
-		for(int i = 0; i < tam; i++)
+		for(int i = 0; i < *tam; i++)
 		{
 			pEmpleado = (Employee*) ll_get(pArrayListEmployee, i);
 
 			if(pEmpleado != NULL)
 			{
-				fail = employee_getId(pEmpleado, &idAux);
+				*fail = employee_getId(pEmpleado, idAux);
 
-				if(!fail && idAux == id)
+				if(!(*fail) && *idAux == id)
 				{
 					index = i;
 					break;
@@ -503,39 +495,51 @@ int controller_findEmployeeById(LinkedList* pArrayListEmployee, int id)
 			}
 		}
 	}
+	free(tam);
+	free(idAux);
+	free(fail);
 
     return index;
 }
 
 int controller_getMaxId(LinkedList* pArrayListEmployee)
 {
-	int idMax = -1;
-	int tam, idAux, fail;
+	int idMax = 0;
+	int* tam = (int*) malloc(sizeof(int));
+	int* idAux = (int*) malloc(sizeof(int));
+	int* fail = (int*) malloc(sizeof(int));
+	int* index = (int*) malloc(sizeof(int));
+
 
 	Employee* pEmpleado;
 
-	if(pArrayListEmployee != NULL)
+	if(pArrayListEmployee != NULL && tam != NULL && idAux != NULL && fail != NULL && index != NULL)
 	{
-		tam = ll_len(pArrayListEmployee);
+		*fail = 1;
+		*tam = ll_len(pArrayListEmployee);
 
-		for(int i = 0; i < tam; i++)
+		for(int i = 0; i < *tam; i++)
 		{
 			pEmpleado = (Employee*) ll_get(pArrayListEmployee, i);
 
 			if(pEmpleado != NULL)
 			{
-				fail = employee_getId(pEmpleado, &idAux);
+				*fail = employee_getId(pEmpleado, idAux);
 
-				if(!fail)
+				if(!(*fail))
 				{
-					if(idAux > idMax)
+					if(*idAux > idMax)
 					{
-						idMax = idAux;
+						idMax = *idAux;
 					}
 				}
 			}
 		}
 	}
+	free(tam);
+	free(idAux);
+	free(fail);
+	free(index);
 
     return idMax;
 }
@@ -543,38 +547,49 @@ int controller_getMaxId(LinkedList* pArrayListEmployee)
 int controller_compareIds(void* first, void* second)
 {
 	int resultado = 0;
-	int firstId, secondId;
+	int* firstId = (int*) malloc(sizeof(int));
+	int* secondId = (int*) malloc(sizeof(int));
+	
+	Employee* firstEmp;
+	Employee* secondEmp;
 
-	if(first != NULL && second != NULL)
+	if(first != NULL && second != NULL && firstId != NULL && secondId != NULL)
 	{
-		Employee* firstEmp = (Employee*) first;
-		Employee* secondEmp = (Employee*) second;
+		firstEmp = (Employee*) first;
+		secondEmp = (Employee*) second;
 
-		if(!employee_getId(firstEmp, &firstId) && !employee_getId(secondEmp, &secondId))
+		if(!employee_getId(firstEmp, firstId) && !employee_getId(secondEmp, secondId))
 		{
-			resultado = firstId - secondId;
+			resultado = *firstId - *secondId;
 		}
 	}
+	free(firstId);
+	free(secondId);
 
-	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
+	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;
 }
 
 int controller_compareNombres(void* first, void* second)
 {
 	int resultado = 0;
-	char firstNombre[128];
-	char secondNombre[128];
+	char* firstNombre = (char*) malloc(sizeof(char) * 128);
+	char* secondNombre = (char*) malloc(sizeof(char) * 128);
 
-	if(first != NULL && second != NULL)
+	Employee* firstEmp;
+	Employee* secondEmp;
+
+	if(first != NULL && second != NULL && firstNombre != NULL && secondNombre != NULL)
 	{
-		Employee* firstEmp = (Employee*) first;
-		Employee* secondEmp = (Employee*) second;
+		firstEmp = (Employee*) first;
+		secondEmp = (Employee*) second;
 		 
 		if(!employee_getNombre(firstEmp, firstNombre) && !employee_getNombre(secondEmp, secondNombre))
 		{
 			resultado = strcmp(firstNombre, secondNombre);
 		}
 	}
+	free(firstNombre);
+	free(secondNombre);
 
 	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;
 }
@@ -582,18 +597,24 @@ int controller_compareNombres(void* first, void* second)
 int controller_compareHoras(void* first, void* second)
 {
 	int resultado = 0;
-	int firstHoras, secondHoras;
+	int* firstHoras = (int*) malloc(sizeof(int));
+	int* secondHoras = (int*) malloc(sizeof(int));
 
-	if(first != NULL && second != NULL)
+	Employee* firstEmp;
+	Employee* secondEmp;
+
+	if(first != NULL && second != NULL && firstHoras != NULL && secondHoras != NULL)
 	{
-		Employee* firstEmp = (Employee*) first;
-		Employee* secondEmp = (Employee*) second;
+		firstEmp = (Employee*) first;
+		secondEmp = (Employee*) second;
 
-		if(!employee_getHorasTrabajadas(firstEmp, &firstHoras) && !employee_getHorasTrabajadas(secondEmp, &secondHoras))
+		if(!employee_getHorasTrabajadas(firstEmp, firstHoras) && !employee_getHorasTrabajadas(secondEmp, secondHoras))
 		{
-			resultado = firstHoras - secondHoras;
+			resultado = *firstHoras - *secondHoras;
 		}
 	}
+	free(firstHoras);
+	free(secondHoras);
 
 	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
 }
@@ -601,39 +622,24 @@ int controller_compareHoras(void* first, void* second)
 int controller_compareSueldos(void* first, void* second)
 {
 	int resultado = 0;
-	int firstSueldo, secondSueldo;
+	int* firstSueldo = (int*) malloc(sizeof(int));
+	int* secondSueldo = (int*) malloc(sizeof(int));
 
-	if(first != NULL && second != NULL)
+	Employee* firstEmp;
+	Employee* secondEmp;
+
+	if(first != NULL && second != NULL && firstSueldo != NULL && secondSueldo != NULL)
 	{
-		Employee* firstEmp = (Employee*) first;
-		Employee* secondEmp = (Employee*) second;
+		firstEmp = (Employee*) first;
+		secondEmp = (Employee*) second;
 
-		if(!employee_getSueldo(firstEmp, &firstSueldo) && !employee_getSueldo(secondEmp, &secondSueldo))
+		if(!employee_getSueldo(firstEmp, firstSueldo) && !employee_getSueldo(secondEmp, secondSueldo))
 		{
 			resultado = firstSueldo - secondSueldo;
 		}
 	}
+	free(firstSueldo);
+	free(secondSueldo);
 
 	return resultado == 0 ? 0 : resultado > 0 ? 1 : -1;	
-}
-
-int controller_setModoDeDato(int modo)
-{
-	int success = 0;
-	FILE* f = fopen("modo.csv", "w");
-	if(f != NULL)
-	{
-		success = fprintf(f,"%d",modo);
-	}	
-	return success;
-}
-int controller_getModoDeDato(int* pModo)
-{
-	int success = 0;
-	FILE* f = fopen("modo.csv", "r");
-	if(f != NULL)
-	{
-		success = fscanf(f,"%d",pModo);
-	}	
-	return success;
 }
