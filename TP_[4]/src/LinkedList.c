@@ -225,27 +225,27 @@ int ll_remove(LinkedList* this,int index)
 {
     int returnAux = -1;
     Node* nodo = NULL;
-    Node* nodoAux = NULL;
+    Node* nodoAnterior = NULL;
 
     if(this != NULL && index >= 0 && ll_len(this))
     {
-        if(index == 0)
+        nodo = getNode(this, index);
+
+        if(index == 0 && nodo != NULL)
         {
-            nodo = this->pFirstNode;
             this->pFirstNode = this->pFirstNode->pNextNode;
             free(nodo);
             this->size--;
             returnAux = 0;
         }
-        else if(index < ll_len(this))
+        else if(index < ll_len(this) && nodo != NULL)
         {
-            nodoAux = this->pFirstNode;
-            for(int i = 0; i < index - 1; i++)
+            nodoAnterior = getNode(this, index - 1);
+
+            if(nodoAnterior != NULL)
             {
-                nodoAux = nodoAux->pNextNode;
+                nodoAnterior->pNextNode = nodoAnterior->pNextNode->pNextNode;
             }
-            nodo = nodoAux->pNextNode;
-            nodoAux->pNextNode = nodo->pNextNode;
             free(nodo);
             this->size--;
             returnAux = 0;
@@ -270,7 +270,7 @@ int ll_clear(LinkedList* this)
     if(this != NULL)
     {
         returnAux = 0;
-        while (ll_len(this) > 0)
+        while (!ll_isEmpty(this))
         {
             if(ll_remove(this, 0))
             {
@@ -294,10 +294,10 @@ int ll_clear(LinkedList* this)
 int ll_deleteLinkedList(LinkedList* this)
 {
     int returnAux = -1;
+    returnAux = ll_clear(this);
 
-    if(this != NULL)
+    if(!returnAux)
     {
-    	returnAux = ll_clear(this);
     	free(this);
     }
 
@@ -411,7 +411,8 @@ int ll_contains(LinkedList* this, void* pElement)
 		returnAux = 0;
 
 		nodo = this->pFirstNode;
-		for(int i = 0; i < ll_len(this); i++)
+
+		while(nodo != NULL)
 		{
 			if(nodo->pElement == pElement)
 			{
@@ -534,44 +535,21 @@ int ll_sort(LinkedList* this, int (*pFunc)(void* ,void*), int order)
             pUno = this->pFirstNode;
             pDos = pUno->pNextNode;
 
-            switch (order)
+            while (pUno->pNextNode != NULL)
             {
-                case 1:
-                    while (pUno->pNextNode != NULL)
+                while (pDos != NULL)
+                {
+                    resultado = (*pFunc)(pUno->pElement, pDos->pElement);
+                    if((resultado > 0 && order) || (resultado < 0 && !order))
                     {
-                        while (pDos != NULL)
-                        {
-                        	resultado = (*pFunc)(pUno->pElement, pDos->pElement);
-                            if(resultado > 0)
-                            {
-                                pAux = pDos->pElement;
-                                pDos->pElement = pUno->pElement;
-                                pUno->pElement = pAux;
-                            }
-                            pDos = pDos->pNextNode;
-                        }
-                        pUno = pUno->pNextNode;
-                        pDos = pUno->pNextNode;
+                        pAux = pDos->pElement;
+                        pDos->pElement = pUno->pElement;
+                        pUno->pElement = pAux;
                     }
-                    break;
-                case 0:
-                    while (pUno->pNextNode != NULL)
-                    {
-                        while (pDos != NULL)
-                        {
-                            resultado = (*pFunc)(pUno->pElement, pDos->pElement);
-                            if(resultado < 0)
-                            {
-                                pAux = pDos->pElement;
-                                pDos->pElement = pUno->pElement;
-                                pUno->pElement = pAux;
-                            }
-                            pDos = pDos->pNextNode;
-                        }
-                        pUno = pUno->pNextNode;
-                        pDos = pUno->pNextNode;
-                    }
-                    break;
+                    pDos = pDos->pNextNode;
+                }
+                pUno = pUno->pNextNode;
+                pDos = pUno->pNextNode;
             }
         }
 	}
@@ -579,5 +557,69 @@ int ll_sort(LinkedList* this, int (*pFunc)(void* ,void*), int order)
 
     return returnAux;
 
+}
+
+/** \brief Por cada de la lista llama a una funcion pasandole como paramtros el pElement y el indice del nodo
+ * la funcion debe retornar 1 (error) o 0 (todo Ok)
+ * 
+ * \param pList LinkedList* Puntero a la lista
+ * \param pFunc (*pFunc) Puntero a la funcion que se quiere aplicar
+ * \return int Retorna  (-1) Error: si el puntero a la listas es NULL
+                                ( 0) Si ok
+                                (> 0) La cantidad de errores
+ */
+int ll_forEach(LinkedList* this, int (*pFunc)(void*,int))
+{
+    Node* nodo = NULL;
+    int todoOk = -1;
+    int index = 0;
+
+    if (this != NULL)
+    {
+        todoOk = 0;
+
+        nodo = this->pFirstNode;
+
+        while (nodo != NULL)
+        {
+            todoOk += (*pFunc)(nodo->pElement, index);
+            
+            nodo = nodo->pNextNode;
+            index++;
+        }
+    }
+    
+    return todoOk;
+}
+
+int printInt(void* pElement, int index)
+{
+    int todoOk = 1;
+    int* num = NULL;
+    
+    if(!(index % 10))
+    {
+        printf("\n");
+    }
+    
+    if (pElement != NULL)
+    {
+        num = (int*) pElement;
+        todoOk = !printf("%02d ", *num);
+    }
+
+    return todoOk;
+}
+
+int compararNums(void* pUno, void* pDos)
+{
+    int resultado = 0;
+
+    if(pUno != NULL && pDos != NULL)
+    {
+        resultado = *((int*) pUno) - *((int*) pDos);
+    }
+
+    return resultado;
 }
 
